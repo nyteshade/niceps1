@@ -1,0 +1,153 @@
+#!/bin/sh
+
+# Function to determine if this script is being sourced
+# or not.
+function isSourced() {
+  if [ "${FUNCNAME[1]}" = source ]; then
+    echo "true"
+  else
+    echo "false"
+  fi
+}
+sourced=$( isSourced )
+
+# We cannot determine any command line parameters if we
+# are sourced from another script.
+if [ "${sourced}" = "true" ]; then
+  this='<sourced>'
+else
+  this="$( cd `dirname ${0}` >/dev/null; pwd )/$(basename ${0})"
+fi
+
+# Detect whether or not we have node.js in the path
+hasNode="$( which node )"
+[[ "${hasNode}N" = "N" ]] && hasNode=false || hasNode=true
+
+function getGitBranch() {
+  local cur_branch="$(git branch 2>/dev/null | sed -n 's|\*\{1\}[ ]\(.*\)|\1|p')"
+  if [ "${cur_branch}n" != "n" ]; then
+    printf "\x1b[0m\x1b[1m(\x1b[95m${cur_branch}\x1b[0m\x1b[1m)\x1b[0m"
+  fi
+}
+
+function ipSource() {
+  local sourcegz="H4sIAOWTp1gCA5VVbW/bNhD+7l9xVZGAsuXEatYNCGsHQbACBYJ2Hzbsg2sYskzZRKwXiHTirPV+++4okpKcbOgAv5AP75X33PGtLNLdfi3gg3pWl/q5EupiOxu89XBSV8mlLITuwzJL1uv6RHYnVxtRENYBlV7Lsi+HEIqeYrUsNn0spXiMOVqsRQYotU81fPrtFr4NANJtUoOs5vHPC+62RZKL+dU7BI4kx18o39YbZbTVtqw1/T7dlbuy5h7ayrX4jGZaJE8Od+W+0N7LUFYfyzpPOgg5dtjReEHfzVH+cF8+ifouUYJZRB7EOoRv4NUVTMGgnLCsrIFxRDmMRipsjjWGiWbYUIVGqBZ6Xxde6zgYNNHK9eFLZh2p/aq52sj5Mbuwvb9hLdR+p9E+HuGHOXmvGvLWmRW+cYsxNDJwDeOYn8Rw/+NBoEgTwXpfsdZzZGQ7Jw5G94hOKLLu7aJmyHuArvGyGunmXlAkMihdcy2sjl1aaZMqM5mEqGvykgXxQBaMFkm9SV0yQ9w8NrlYitnugKHOK8zAbFqiqIjKizyZv3v/viWurP40PJwvMNTg6yFezSf5mWoW/OonXAdd4S8d6TPVPSQmvrAV86tf8mtn7cpbzk/0umavrVXKOJNIDgTjCGRkuqagAuCuMq3hqkG9KSs1jycmNdNtSdMMWCqRK6HZOQERTO7RkPxLlBkjsdCUhI4uXL+Rv4lHfasS7FHXrS6AjdD2/tEP/RmzWAkU8JWgpDJgVEaYQQzn58D+tpwNboKITD/O40UI37+DP9iKXdU5C5uiA1RISp2x4A+VbMQ1nCmam500ZjAfj4tynFLwC9pQ0GO678XXAi2ukKq0Y8b0ZNFchW86k9fRIG42yGnMJXlJuRyNQjCHlJIPtuMkiIxduaCIX9xazGFVi+SB/38PLqdXHHSLNXEe/jsJ7+ENO2VBokvJvA/vpM8TtE51dUR42sqdYFh4VyYyjdvxDPmxJCpQ2XvAeKaSZZbkcvcM0yncflx++vzr707f97cq0wcSX8oChtUtWZoCe+0w7JnnzowlDPWJXFxIHBLYwsgDemiXhS4TZqxiOLIwmo4QL3SpvE7b+yLQK9i/yyGkZfEocDbTsXtMYHjpDNOEbI3yH3iDTlWsJTsRRiMPuKUpkGvGNlxx0I7hzRBNq2fWzMjolE03flDik+PHoMnWUKfHblc5MpnofzfZTkw02hmD4SuN10w9Pw45Eu6DS5mDaZWWbm98s+xKqm97WWHLKltRuwP7OkTt3vi6gSDA6III7fijDoM81u9vq9bxbAU9QVwqE08xGu6d6mXmKcR5P5v22y60bW1r23zdMMTBFtpRS2+rm8luJB8H/wBJZPdHfAoAAA=="
+  local targetDir="${1:-/tmp}"
+  local targetExe="${2:-getCIP}"
+  local opt=`echo "aGkK" | base64 -d 2>/dev/null && echo "-d" || echo "-D"`
+  if [ ${targetDir} = "--view" ]; then
+    echo "${sourcegz}" | base64 ${opt} | gzip -d
+  else
+    echo "${sourcegz}" | base64 ${opt} | gzip -d | gcc -o "${targetDir}/${targetExe}" -xc -
+  fi
+}
+
+function sourceFileToVar() {
+  cat "${1}" | gzip -9c | base64
+}
+
+function getIPPython () {
+  if [ -e /tmp/ip.txt ]; then
+    cat /tmp/ip.txt
+  else
+    python -c 'import socket;s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM);s.connect(("google.com",80));print s.getsockname()[0]' > /tmp/ip.txt
+    cat /tmp/ip.txt
+  fi
+}
+
+function getIPNode () {
+  CLI="\
+    function getIPAddress() {\
+      var interfaces = require('os').networkInterfaces();\
+      for (var devName in interfaces) {\
+        var iface = interfaces[devName];\
+        for (var i = 0; i < iface.length; i++) {\
+          var alias = iface[i];\
+          if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' \
+              && !alias.internal)\
+            return alias.address;\
+        }\
+      }\
+      return '0.0.0.0';\
+    }\
+    console.log(getIPAddress());\
+  "
+  node -e "${CLI}"
+}
+
+function getIP () {
+  if [ "$(which getCIP)z" != "z" ]; then
+    getCIP ${GETCIP_OPTS:-"2 --hide-name"}
+  else
+    if [ "$(which node)z" = "z" ]; then
+      getIPPython
+    else
+      getIPNode
+    fi
+  fi
+}
+
+function getPrompt () {
+  if [ $(id -u) = "0" ]; then
+    #printf "#"
+    printf "᰾"
+  else
+    #printf "$"
+    printf "꩜"
+  fi
+}
+
+function getNodeVersion () {
+  if [ "${hasNode}" = true ]; then
+    printf "($(node --version))"
+  fi
+}
+
+# If the file is being sourced from another shell script, then set the PS1
+# prompt and exit. Otherwise, act as a command line tool. The first parameter
+# determines the functionality when executed in that mode.
+if [ "$(isSourced)" = "true" ]; then
+  export PS1='\r\n\[\e[1m\e[33m\]\u\[\e[0m@\e[1m\e[31m\]\H\[\e[0m\]/\[\e[1m\e[34m\]`getIP` \[\e[0m\]`getGitBranch`\[\e[0m\]`getNodeVersion`\[\e[0m\]:\r\n\[\e[1m\e[32m\]\w\r\n\[\e[0m\]\[\e[90m\]`getPrompt`\[\e[0m\] '
+  return 2>/dev/null || exit
+elif [ "${#}" -lt 1 ]; then
+  TOOL=$( basename ${0} )
+  printf "\nUsage: ${TOOL} <getIP|getPrompt|getGitBranch|install>\n"
+  printf "\tgetIP        - returns the ip address of this machine\n"
+  printf "\tgetPrompt    - returns \$ for normal and # for root users\n"
+  printf "\tgetGitBranch - returns the current branch if in a git repo dir\n"
+  printf "\tbuildCIP     - builds and installs c tool to get IP addrs\n"
+  printf "\tinstall      - installs command line tools for the above tools\n\n"
+  printf "NOTE: Tools are installed to /usr/local/bin by default. In order\n"
+  printf "      install them into another directory, make the call with\n"
+  printf "      \x1b[1mINSTALL_DIR=/path/to/bin ${TOOL} install\x1b[0m\n"
+  printf "      in order to change that path.\n\n"
+  return 2>/dev/null || exit
+elif [ "${1}" = "getIP" ]; then
+  getIP
+elif [ "${1}" = "getPrompt" ]; then
+  getPrompt
+elif [ "${1}" = "getGitBranch" ]; then
+  getGitBranch
+elif [ "${1}" = "buildCIP" ]; then
+  if [ "${2}" = "--view" ]; then
+    ipSource --view
+  else
+    ipSource "${2:-/usr/local/bin}"
+  fi
+elif [ "${1}" = "install" ]; then
+  export INSTALL_DIR=/usr/local/bin
+  printf >${INSTALL_DIR}/getIP << EOF "#!/bin/sh
+${this} getIP"
+EOF
+  chmod +x ${INSTALL_DIR}/getIP
+
+  printf >${INSTALL_DIR}/getPrompt << EOF "#!/bin/sh
+${this} getPrompt"
+EOF
+  chmod +x ${INSTALL_DIR}/getPrompt
+
+  printf >${INSTALL_DIR}/getGitBranch << EOF "#!/bin/sh
+${this} getGitBranch"
+EOF
+  chmod +x ${INSTALL_DIR}/getGitBranch
+fi

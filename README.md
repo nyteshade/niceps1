@@ -1,5 +1,12 @@
 # niceps1
-A nice UNIX prompt that works with MacOS and most flavors of Linux
+A nice UNIX prompt that works with MacOS and most flavors of Linux. Note that the design is aimed towards shells or terminals with dark backgrounds. You may wish to alter the prompt colors yourself if you use a light background instead.
+Finally, note, that this repository is here primarily for my own usage and I'll help out where I can but wanted to share if others find it useful.
+
+- [x] Shows current IP addresses
+- [x] Shows current git and hg branches if you are in such a directory
+- [x] Shows current node JS version if you are using node
+- [x] Shows user name, host name, and current directory
+- [x] Is colorful. :)
 
 # To Install
 Move to the directory you wish the script to live in and close the repo

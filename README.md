@@ -8,6 +8,8 @@ Finally, note, that this repository is here primarily for my own usage and I'll 
 - [x] Shows user name, host name, and current directory
 - [x] Is colorful. :)
 
+![Screenshot](https://github.com/nyteshade/niceps1/raw/master/screenshots/example.png)
+
 # To Install
 Move to the directory you wish the script to live in and close the repo
 

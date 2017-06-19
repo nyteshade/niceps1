@@ -21,7 +21,7 @@ Then, from the directory containing your niceps1 directory, add a call to source
 
 ```sh
 printf >>~/.profile "# Add path to your niceps1 checkout\n"
-printf >>~/.profile "export PATH=\“${PATH}\”:$(pwd)\n\n"
+printf >>~/.profile "export PATH=${PATH}:$(pwd)\n\n"
 printf >>~/.profile "# Source the niceps1 script\n"
 printf >>~/.profile "source $(pwd)/niceps1\n\n"
 ```

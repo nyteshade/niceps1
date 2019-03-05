@@ -46,7 +46,13 @@ If successful you’ll see something like the following. It lists IP addresses f
 192.168.97.23:en0,10.244.197.209:en3
 ```
 
+### Try it now
 
+Open up a shell and paste this into your console. The code will download the latest RAW version of the niceps1 script and apply it directly in your shell. _Tested with `bash`_
+
+```sh
+source /dev/stdin <<< "$(curl -s https://raw.githubusercontent.com/nyteshade/niceps1/master/niceps1)"
+```
 
 
 

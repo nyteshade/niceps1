@@ -34,7 +34,7 @@ function ipSource() {
   local sourcegz="H4sIAOWTp1gCA5VVbW/bNhD+7l9xVZGAsuXEatYNCGsHQbACBYJ2Hzbsg2sYskzZRKwXiHTirPV+++4okpKcbOgAv5AP75X33PGtLNLdfi3gg3pWl/q5EupiOxu89XBSV8mlLITuwzJL1uv6RHYnVxtRENYBlV7Lsi+HEIqeYrUsNn0spXiMOVqsRQYotU81fPrtFr4NANJtUoOs5vHPC+62RZKL+dU7BI4kx18o39YbZbTVtqw1/T7dlbuy5h7ayrX4jGZaJE8Od+W+0N7LUFYfyzpPOgg5dtjReEHfzVH+cF8+ifouUYJZRB7EOoRv4NUVTMGgnLCsrIFxRDmMRipsjjWGiWbYUIVGqBZ6Xxde6zgYNNHK9eFLZh2p/aq52sj5Mbuwvb9hLdR+p9E+HuGHOXmvGvLWmRW+cYsxNDJwDeOYn8Rw/+NBoEgTwXpfsdZzZGQ7Jw5G94hOKLLu7aJmyHuArvGyGunmXlAkMihdcy2sjl1aaZMqM5mEqGvykgXxQBaMFkm9SV0yQ9w8NrlYitnugKHOK8zAbFqiqIjKizyZv3v/viWurP40PJwvMNTg6yFezSf5mWoW/OonXAdd4S8d6TPVPSQmvrAV86tf8mtn7cpbzk/0umavrVXKOJNIDgTjCGRkuqagAuCuMq3hqkG9KSs1jycmNdNtSdMMWCqRK6HZOQERTO7RkPxLlBkjsdCUhI4uXL+Rv4lHfasS7FHXrS6AjdD2/tEP/RmzWAkU8JWgpDJgVEaYQQzn58D+tpwNboKITD/O40UI37+DP9iKXdU5C5uiA1RISp2x4A+VbMQ1nCmam500ZjAfj4tynFLwC9pQ0GO678XXAi2ukKq0Y8b0ZNFchW86k9fRIG42yGnMJXlJuRyNQjCHlJIPtuMkiIxduaCIX9xazGFVi+SB/38PLqdXHHSLNXEe/jsJ7+ENO2VBokvJvA/vpM8TtE51dUR42sqdYFh4VyYyjdvxDPmxJCpQ2XvAeKaSZZbkcvcM0yncflx++vzr707f97cq0wcSX8oChtUtWZoCe+0w7JnnzowlDPWJXFxIHBLYwsgDemiXhS4TZqxiOLIwmo4QL3SpvE7b+yLQK9i/yyGkZfEocDbTsXtMYHjpDNOEbI3yH3iDTlWsJTsRRiMPuKUpkGvGNlxx0I7hzRBNq2fWzMjolE03flDik+PHoMnWUKfHblc5MpnofzfZTkw02hmD4SuN10w9Pw45Eu6DS5mDaZWWbm98s+xKqm97WWHLKltRuwP7OkTt3vi6gSDA6III7fijDoM81u9vq9bxbAU9QVwqE08xGu6d6mXmKcR5P5v22y60bW1r23zdMMTBFtpRS2+rm8luJB8H/wBJZPdHfAoAAA=="
   local targetDir="${1:-/tmp}"
   local targetExe="${2:-getCIP}"
-  local opt=`echo "aGkK" | base64 -d 2>/dev/null && echo "-d" || echo "-D"`
+  local opt=`echo "aGkK" | base64 -d >/dev/null 2>/dev/null && echo "-d" || echo "-D"`
   if [ ${targetDir} = "--view" ]; then
     echo "${sourcegz}" | base64 ${opt} | gzip -d
   else

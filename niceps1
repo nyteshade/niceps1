@@ -3,12 +3,24 @@
 # Function to determine if this script is being sourced
 # or not.
 function isSourced() {
-  if [ "${FUNCNAME[1]}" = source ]; then
-    echo "true"
-  else
-    echo "false"
+  if [[ "${SHELL}" = "$(which zsh)" ]]; then
+    if [[ ${SHLVL} -gt 1 ]]; then
+      echo "false"
+    elif [[ ${SHLVL} -eq 1 ]]; then
+      echo "true"
+    else
+      echo "  ERROR: THIS TECHNIQUE IS BROKEN"
+      echo "  SHLVL: \"${SHLVL}\""
+    fi
+  else 
+    if [ "${FUNCNAME[1]}" = source ]; then
+      echo "true"
+    else
+      echo "false"
+    fi
   fi
 }
+
 sourced=$( isSourced )
 
 # We cannot determine any command line parameters if we
@@ -46,6 +58,30 @@ function sourceFileToVar() {
   cat "${1}" | gzip -9c | base64
 }
 
+function join_by() {
+  local d=${1-} f=${2-}
+  
+  if shift 2; then
+    printf "%s" "$f" "${@/#/$d}"
+  fi
+}
+
+function getIPShell() {
+  declare -a items=(`ipconfig getiflist`)
+  declare -a ips=()
+  declare ip=""
+
+  for i in "${items[@]}"
+  do
+    ip=$(ipconfig getifaddr ${i})
+    if [[ "${ip}" != "" ]]; then
+      ips+=("${ip}")
+    fi
+  done
+
+  printf "%s" "`join_by , "${ips[@]}"`"
+}
+
 function getIPPython () {
   if [ -e /tmp/ip.txt ]; then
     cat /tmp/ip.txt
@@ -56,6 +92,7 @@ function getIPPython () {
 }
 
 function getIPNode () {
+  echo "Triggering node"
   CLI="\
     function getIPAddress() {\
       var interfaces = require('os').networkInterfaces();\
@@ -78,6 +115,8 @@ function getIPNode () {
 function getIP () {
   if [ "$(which getCIP)z" != "z" ]; then
     getCIP ${GETCIP_OPTS:-"2 --hide-name"}
+  elif [ "$(which ipconfig)z" != "z" ]; then
+    getIPShell
   else
     if [ "$(which node)z" = "z" ]; then
       getIPPython
@@ -89,11 +128,11 @@ function getIP () {
 
 function getPrompt () {
   if [ $(id -u) = "0" ]; then
-    #printf "#"
-    printf "᰾"
+    printf "#"
+    #printf "᰾"
   else
-    #printf "$"
-    printf "꩜"
+    printf "$"
+    #printf "꩜"
   fi
 }
 
@@ -103,11 +142,31 @@ function getNodeVersion () {
   fi
 }
 
+terse_git_prompt_info () {
+	local ref
+	if [[ "$(command git config --get oh-my-zsh.hide-status 2>/dev/null)" != "1" ]]
+	then
+		ref=$(command git symbolic-ref HEAD 2> /dev/null)  || ref=$(command git rev-parse --short HEAD 2> /dev/null)  || return 0
+		echo "(%{\x1b[31m%}${ref#refs/heads/}$(parse_git_dirty)$ZSH_THEME_GIT_PROMPT_SUFFIX"
+	fi
+}
+
 # If the file is being sourced from another shell script, then set the PS1
 # prompt and exit. Otherwise, act as a command line tool. The first parameter
 # determines the functionality when executed in that mode.
 if [ "$(isSourced)" = "true" ]; then
-  export PS1='\r\n\[\e[1m\e[33m\]\u\[\e[0m@\e[1m\e[31m\]\H\[\e[0m\]/\[\e[1m\e[34m\]`getIP` \[\e[0m\]`getGitBranch`\[\e[0m\]`getNodeVersion`\[\e[0m\]:\r\n\[\e[1m\e[32m\]\w\r\n\[\e[0m\]\[\e[90m\]`getPrompt`\[\e[0m\] '
+  if [ "${SHELL}" = "$(which zsh)" ]; then
+
+# do not modify indentation or it will apply to the prompt
+export PS1=$'
+%{\x1b[1m%}%{$fg[yellow]%}%{$USER%}%{$reset_color%}@%{\x1b[1m%}%{$fg[red]%}%{$HOST%}%{$reset_color%}/$(getIP) $(terse_git_prompt_info)
+%{\x1b[1m%}%{$fg[green]%}$(pwd)%{$reset_color%}
+%(?:%{$fg[green]%}➜:%{$fg[red]%}➜) %{$reset_color%}'
+# you may adjust indentation after this line as necessary
+
+  else
+    export PS1='\r\n\[\e[1m\e[33m\]\u\[\e[0m@\e[1m\e[31m\]\H\[\e[0m\]/\[\e[1m\e[34m\]`getIP` \[\e[0m\]`getGitBranch`\[\e[0m\]`getNodeVersion`\[\e[0m\]:\r\n\[\e[1m\e[32m\]\w\r\n\[\e[0m\]\[\e[90m\]`getPrompt`\[\e[0m\] '
+  fi
   return 2>/dev/null || exit
 elif [ "${#}" -lt 1 ]; then
   TOOL=$( basename ${0} )

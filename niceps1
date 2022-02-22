@@ -3,7 +3,7 @@
 # Function to determine if this script is being sourced
 # or not.
 function isSourced() {
-  if [[ "${SHELL}" = "$(which zsh)" ]]; then
+  if [[ "${ZSH_VERSION}" != "" ]]; then
     if [[ ${SHLVL} -gt 1 ]]; then
       echo "false"
     elif [[ ${SHLVL} -eq 1 ]]; then
@@ -155,7 +155,7 @@ terse_git_prompt_info () {
 # prompt and exit. Otherwise, act as a command line tool. The first parameter
 # determines the functionality when executed in that mode.
 if [ "$(isSourced)" = "true" ]; then
-  if [ "${SHELL}" = "$(which zsh)" ]; then
+  if [ "${ZSH_VERSION}" != "" ]; then
 
 # do not modify indentation or it will apply to the prompt
 export PS1=$'

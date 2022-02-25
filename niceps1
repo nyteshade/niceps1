@@ -175,6 +175,8 @@ elif [ "${#}" -lt 1 ]; then
   printf "\tgetPrompt    - returns \$ for normal and # for root users\n"
   printf "\tgetGitBranch - returns the current branch if in a git repo dir\n"
   printf "\tbuildCIP     - builds and installs c tool to get IP addrs\n"
+  printf "\t               Note that passing --view will show the code\n"
+  printf "\t               used to build that command line tool\n"
   printf "\tinstall      - installs command line tools for the above tools\n\n"
   printf "NOTE: Tools are installed to /usr/local/bin by default. In order\n"
   printf "      install them into another directory, make the call with\n"

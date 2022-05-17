@@ -23,6 +23,11 @@ function isSourced() {
 
 sourced=$( isSourced )
 
+function checkFor() {
+  which >/dev/null "${1}"
+  return $?
+}
+
 # We cannot determine any command line parameters if we
 # are sourced from another script.
 if [ "${sourced}" = "true" ]; then
@@ -67,6 +72,11 @@ function join_by() {
 }
 
 function getIPShell() {
+  if checkFor ip; then
+    ip route get 1.2.3.4 | awk '{print $7}'
+    return
+  fi
+
   declare -a items=(`ipconfig getiflist`)
   declare -a ips=()
   declare ip=""
@@ -79,7 +89,7 @@ function getIPShell() {
     fi
   done
 
-  printf "%s" "`join_by , "${ips[@]}"`"
+  printf "\x1b[34m%s\x1b[0m" "`join_by , "${ips[@]}"`"
 }
 
 function getIPPython () {
@@ -113,16 +123,26 @@ function getIPNode () {
 }
 
 function getIP () {
-  if [ "$(which getCIP)z" != "z" ]; then
+  canUseShell=1
+
+  if [ ${canUseShell} -ne 0 ]; then
+    checkFor ip
+    canUseshell=$?
+  fi
+
+  if [ ${canUseShell} -ne 0 ]; then
+    checkFor ipconfig
+    canUseShell=$?
+  fi
+
+  if checkFor getCIP; then
     getCIP ${GETCIP_OPTS:-"2 --hide-name"}
-  elif [ "$(which ipconfig)z" != "z" ]; then
+  elif [ ${canUseShell} -eq 0 ]; then
     getIPShell
-  else
-    if [ "$(which node)z" = "z" ]; then
+  elif checkFor python; then
       getIPPython
-    else
+  elif checkFor node; then
       getIPNode
-    fi
   fi
 }
 

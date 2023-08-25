@@ -185,7 +185,7 @@ export PS1=$'
 # you may adjust indentation after this line as necessary
 
   else
-    export PS1='\r\n\[\e[1m\e[33m\]\u\[\e[0m@\e[1m\e[31m\]\H\[\e[0m\]/\[\e[1m\e[34m\]`getIP` \[\e[0m\]`getGitBranch`\[\e[0m\]`getNodeVersion`\[\e[0m\]:\r\n\[\e[1m\e[32m\]\w\r\n\[\e[0m\]\[\e[90m\]`getPrompt`\[\e[0m\] '
+    export PS1='\r\n\[\e[1m\e[33m\]\u\[\e[0m@\e[1m\e[31m\]\H\[\e[0m\]/\[\e[1m\e[34m\]`getIP` \[\e[0m\]`getGitBranch`\[\e[0m\]`getNodeVersion`\[\e[0m\]:\r\n\[\e[1m\e[32m\]\w\r\n\[\e[0m\]\[\e[97m\]`getPrompt`\[\e[0m\] '
   fi
   return 2>/dev/null || exit
 elif [ "${#}" -lt 1 ]; then

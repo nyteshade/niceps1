@@ -125,24 +125,26 @@ function getIPNode () {
 function getIP () {
   canUseShell=1
 
-  if [ ${canUseShell} -ne 0 ]; then
-    checkFor ip
-    canUseshell=$?
-  fi
-
-  if [ ${canUseShell} -ne 0 ]; then
-    checkFor ipconfig
-    canUseShell=$?
-  fi
-
   if checkFor getCIP; then
     getCIP ${GETCIP_OPTS:-"2 --hide-name"}
-  elif [ ${canUseShell} -eq 0 ]; then
-    getIPShell
-  elif checkFor python; then
+  else
+    if [ ${canUseShell} -ne 0 ]; then
+      checkFor ip
+      canUseshell=$?
+    fi
+
+    if [ ${canUseShell} -ne 0 ]; then
+      checkFor ipconfig
+      canUseShell=$?
+    fi
+
+    if [ ${canUseShell} -eq 0 ]; then
+      getIPShell
+    elif checkFor python; then
       getIPPython
-  elif checkFor node; then
+    elif checkFor node; then
       getIPNode
+    fi
   fi
 }
 
@@ -163,12 +165,12 @@ function getNodeVersion () {
 }
 
 terse_git_prompt_info () {
-	local ref
-	if [[ "$(command git config --get oh-my-zsh.hide-status 2>/dev/null)" != "1" ]]
-	then
-		ref=$(command git symbolic-ref HEAD 2> /dev/null)  || ref=$(command git rev-parse --short HEAD 2> /dev/null)  || return 0
-		echo "(%{\x1b[31m%}${ref#refs/heads/}$(parse_git_dirty)$ZSH_THEME_GIT_PROMPT_SUFFIX"
-	fi
+  local ref
+  if [[ "$(command git config --get oh-my-zsh.hide-status 2>/dev/null)" != "1" ]]
+  then
+    ref=$(command git symbolic-ref HEAD 2> /dev/null)  || ref=$(command git rev-parse --short HEAD 2> /dev/null)  || return 0
+    echo "(%{\x1b[31m%}${ref#refs/heads/}$(parse_git_dirty)$ZSH_THEME_GIT_PROMPT_SUFFIX"
+  fi
 }
 
 # If the file is being sourced from another shell script, then set the PS1
